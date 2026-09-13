@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
 """
 Root-level run script for WS Lounge System.
@@ -30,7 +29,7 @@ except FileNotFoundError:
     print("Error: high_end_ws_lounge/run.py not found.")
     sys.exit(1)
 
-=======
+
 #!/usr/bin/env python3
 """
 Root-level run script for WS Lounge System.
@@ -62,4 +61,4 @@ except FileNotFoundError:
     print("Error: high_end_ws_lounge/run.py not found.")
     sys.exit(1)
 
->>>>>>> 7e874df2e435e64909f80e327d94360118425f97
+
