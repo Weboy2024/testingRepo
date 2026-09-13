@@ -11,6 +11,7 @@ __pycache__/
 .env
 *.db
 app.db
+test_db.db
 
 # VS Code settings
 .vscode/

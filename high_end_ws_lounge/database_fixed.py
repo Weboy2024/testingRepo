@@ -3,7 +3,6 @@ Fixed database.py - clean imports for membership features
 """
 
 import os
-import sqlite3
 from datetime import datetime, timedelta
 
 from flask import Flask
@@ -14,7 +13,7 @@ from flask_wtf import FlaskForm
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin
-from sqlalchemy import and_, create_engine, func, inspect, or_, text
+from sqlalchemy import and_, func, inspect, or_, text
 from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import (
     DateTimeLocalField,
@@ -49,39 +48,12 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def resolve_database_uri():
-    # 1. Kuhaon ang URI halin sa Environment Variable sang Render
-    env_uri = os.environ.get("SQLALCHEMY_DATABASE_URI") or os.environ.get("DATABASE_URL")
-    preferred_local_uri = f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}"
+    db_url = os.getenv("DATABASE_URL") or os.getenv("SQLALCHEMY_DATABASE_URI") or "sqlite:///test_db.db"
 
-    # Kon wala sing environment variable (halimbawa sa local development), gamiton ang SQLite
-    if not env_uri:
-        return preferred_local_uri
+    if db_url.startswith("mysql://"):
+        db_url = db_url.replace("mysql://", "mysql+pymysql://", 1)
 
-    # Kon SQLite ang gigamit
-    if env_uri.startswith("sqlite"):
-        return env_uri
-
-    # Fix para sa Render PostgreSQL prefix compatibility (postgres:// -> postgresql://)
-    if env_uri.startswith("postgres://"):
-        env_uri = env_uri.replace("postgres://", "postgresql://", 1)
-
-    # Siguraduhon nga ibalik ang postgresql URI para sa Render production
-    if env_uri.startswith("postgresql") or env_uri.startswith("mysql"):
-        try:
-            engine = create_engine(env_uri)
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-            return env_uri
-        except Exception as exc:
-            print(
-                "Warning: configured SQLALCHEMY_DATABASE_URI is not reachable; "
-                "falling back to local SQLite."
-            )
-            print(f"Database error: {exc}")
-            # Kon luyag mo iduso nga mag-Postgres gid sa Render nga indi mag-fallback sa SQLite:
-            return env_uri
-
-    return env_uri
+    return db_url
 
 
 class Config:
